@@ -24,6 +24,9 @@ client.on("message", (message) => {
   if (message.content.startsWith(";link")) {
     linkVCtoText(message);
   }
+  if (message.content.startsWith(";unlink")) {
+    unlinkVC(message);
+  }
 });
 
 client.on("voiceStateUpdate", (oldState, newState) => {
@@ -60,12 +63,10 @@ client.login(process.env.DISCORD_TOKEN);
  * @param {Discord.Message} message
  */
 function linkVCtoText(message) {
-  let args = message.content.split(" ").slice(1);
+  let args = message.cleanContent.split(" ").slice(1);
   if (args.length === 2 && message.member.hasPermission("ADMINISTRATOR")) {
     try {
-      console.log(args);
       let channels = args.map((chn) => message.guild.channels.resolve(chn));
-      console.log(channels);
       let textChannel = channels.find((c) => c.type === "text");
       let vChannel = channels.find((c) => c.type === "voice");
 
@@ -94,6 +95,24 @@ function linkVCtoText(message) {
     } catch (error) {
       console.log(error);
       message.channel.send("Unable to link channels.");
+    }
+  }
+}
+function unlinkVC(message) {
+  let args = message.cleanContent.split(" ").slice(1);
+  if (args.length === 1 && message.member.hasPermission("ADMINISTRATOR")) {
+    try {
+      let channels = args.map((chn) => message.guild.channels.resolve(chn));
+      let vChannel = channels.find((c) => c.type === "voice");
+      const collection = db.db("channels").collection("vc-text-link");
+      collection.findOneAndDelete({ voice: vChannel.id }, {}, (err, res) => {
+        if (!err) {
+          message.channel.send(`Successfully unlinked ${vChannel}`);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      message.channel.send("Unable to unlink channel.");
     }
   }
 }
