@@ -30,6 +30,9 @@ client.on("message", (message) => {
 });
 
 client.on("voiceStateUpdate", (oldState, newState) => {
+  if(oldState.channelID === newState.channelID)
+    return
+
   if (oldState.channelID !== null) {
     const collection = db.db("channels").collection("vc-text-link");
     collection.findOne({ voice: oldState.channelID }).then((res) => {
