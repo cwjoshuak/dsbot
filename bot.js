@@ -30,7 +30,7 @@ client.on("message", (message) => {
 });
 
 client.on("voiceStateUpdate", (oldState, newState) => {
-  if(oldState.channelID === newState.channelID)
+  if (oldState.channelID === newState.channelID)
     return
 
   if (oldState.channelID !== null) {
