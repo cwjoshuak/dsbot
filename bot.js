@@ -1,6 +1,8 @@
 "use strict";
 
 const Discord = require("discord.js");
+var moment = require("moment");
+
 require("dotenv").config();
 
 const MongoClient = require("mongodb").MongoClient;
@@ -12,7 +14,9 @@ const db = new MongoClient(uri, {
 db.connect((err) => {
   if (err) return;
 });
-const client = new Discord.Client();
+const client = new Discord.Client({
+  partials: ["MESSAGE", "CHANNEL", "REACTION"],
+});
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -28,10 +32,50 @@ client.on("message", (message) => {
     unlinkVC(message);
   }
 });
+client.on("messageReactionAdd", async (reaction, user) => {
+  const message = !reaction.message.author
+    ? await reaction.message.fetch()
+    : reaction.message;
+
+  if (
+    ![
+      "857725128498610176",
+      "762832156212592662",
+      "826927563158192128",
+      "807005531674771466",
+      "876569492082290699",
+      "869740380906717264",
+      "856429658564198480",
+    ].includes(message.channel.id)
+  ) {
+    if (
+      reaction.emoji.name === "💀" &&
+      message.reactions.cache.get("💀").count >= 7
+    ) {
+      const msg = await reaction.message.delete();
+
+      const embed = new Discord.MessageEmbed()
+        .setColor([206, 214, 220])
+        .setDescription(msg.cleanContent)
+        .setAuthor(msg.author.username, msg.author.displayAvatarURL())
+        .setFooter(`${msg.id} • ${moment(msg.createdAt).fromNow()}`);
+      if (msg.attachments.first() !== undefined) {
+        embed.setImage(msg.attachments.first().attachment);
+      } else if (msg.embeds.length > 0 && msg.embeds[0].type === "image") {
+        embed.setDescription("");
+        embed.setImage(msg.embeds[0].url);
+      }
+      msg.guild.channels.cache
+        .get("876569492082290699")
+        .send(msg.channel, { embed: embed })
+        // .then(console.log)
+        .catch(console.err);
+    }
+  }
+});
 
 client.on("voiceStateUpdate", (oldState, newState) => {
-  if (oldState.channelID === newState.channelID)
-    return
+  if (oldState.channelID === newState.channelID) return;
 
   if (oldState.channelID !== null) {
     const collection = db.db("channels").collection("vc-text-link");
