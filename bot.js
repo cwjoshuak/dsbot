@@ -1,7 +1,6 @@
 "use strict";
 
 const Discord = require("discord.js");
-var moment = require("moment");
 
 require("dotenv").config();
 
@@ -58,7 +57,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
         .setColor([206, 214, 220])
         .setDescription(msg.cleanContent)
         .setAuthor(msg.author.username, msg.author.displayAvatarURL())
-        .setFooter(`${msg.id} • ${moment(msg.createdAt).fromNow()}`);
+        .setTimestamp()
+        .setFooter(msg.id;
       if (msg.attachments.first() !== undefined) {
         embed.setImage(msg.attachments.first().attachment);
       } else if (msg.embeds.length > 0 && msg.embeds[0].type === "image") {
