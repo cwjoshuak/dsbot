@@ -58,7 +58,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
         .setDescription(msg.cleanContent)
         .setAuthor(msg.author.username, msg.author.displayAvatarURL())
         .setTimestamp()
-        .setFooter(msg.id;
+        .setFooter(msg.id);
       if (msg.attachments.first() !== undefined) {
         embed.setImage(msg.attachments.first().attachment);
       } else if (msg.embeds.length > 0 && msg.embeds[0].type === "image") {
