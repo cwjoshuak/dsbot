@@ -51,7 +51,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
       reaction.emoji.name === "💀" &&
       message.reactions.cache.get("💀").count >= 7
     ) {
-      const msg = await reaction.message.delete();
+      const msg = reaction.message;
 
       const embed = new Discord.MessageEmbed()
         .setColor([206, 214, 220])
