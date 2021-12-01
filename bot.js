@@ -115,7 +115,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
       const embed = new Discord.MessageEmbed()
         .setColor([206, 214, 220])
         .setDescription(msg.cleanContent)
-        .addField('', `[Jump to Message](${reaction.message.url})`)
+        .addField("Source", `[Jump to Message](${reaction.message.url})`)
         .setAuthor(msg.author.username, msg.author.displayAvatarURL())
         .setTimestamp()
         .setFooter(msg.id);
