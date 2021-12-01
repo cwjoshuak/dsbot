@@ -3,9 +3,10 @@
 const Discord = require("discord.js");
 
 require("dotenv").config();
-
+const fetch = require("node-fetch");
 const MongoClient = require("mongodb").MongoClient;
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PW}@database.mc895.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
+
 const db = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -16,10 +17,68 @@ db.connect((err) => {
 const client = new Discord.Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
-
-client.on("ready", () => {
+const session_id = process.env.AOC_SESSION_ID;
+const AOC_leaderboard_channel = 915535821912813608;
+client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  const channel = await client.channels.fetch(AOC_leaderboard_channel);
+  const message = await adventOfCode();
+  const AOC_message_id = (await channel.send(message)).id;
+  setInterval(
+    async (AOC_message_id) => {
+      const channel = await client.channels.fetch(AOC_leaderboard_channel);
+      const message = await adventOfCode();
+      const msg = await channel.messages.fetch(AOC_message_id);
+      await msg.edit(message);
+    },
+    600000,
+    AOC_message_id
+  );
 });
+
+/**
+ * @param {Discord.TextChannel} channel - Advent of Code text channel
+ *
+ */
+async function adventOfCode() {
+  const daysSinceStart = new Date().getDate();
+
+  let data = await getAOCLeaderboard();
+  data = Object.values(data.members).sort(
+    (m1, m2) => m2.local_score - m1.local_score + m2.stars - m1.stars
+  );
+  data = data.map((m, idx) => {
+    let starsPerDay = Object.values(m.completion_day_level).map((c) => {
+      const length = Object.values(c).length;
+      if (length === 2) return "🌟";
+      else if (length === 1) return "⭐";
+      return "";
+    });
+
+    starsPerDay = starsPerDay
+      .concat(Array(daysSinceStart - starsPerDay.length).fill("⚫"))
+      .slice(0, daysSinceStart);
+
+    const scoreString = starsPerDay.join("").padEnd(25);
+    return `${((idx + 1).toString() + ")").padStart(3)} ${m.local_score
+      .toString()
+      .padStart(3, " ")} ${scoreString} ${m.name}`;
+  });
+
+  return `🎄 **Advent of Code Leaderboard 2021**\
+    \`\`\`${data.join("\n")}\`\`\``;
+}
+async function getAOCLeaderboard() {
+  const response = await fetch(
+    "https://adventofcode.com/2021/leaderboard/private/view/1519450.json",
+    {
+      headers: { cookie: `session=${session_id};` },
+      credentials: "include",
+    }
+  );
+  const json = await response.json();
+  return json;
+}
 
 // Create an event listener for messages
 client.on("message", (message) => {
