@@ -18,12 +18,15 @@ const client = new Discord.Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
 const session_id = process.env.AOC_SESSION_ID;
-const AOC_leaderboard_channel = 915535821912813608;
+const AOC_leaderboard_channel = "915535821912813608";
 client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   const channel = await client.channels.fetch(AOC_leaderboard_channel);
   const message = await adventOfCode();
-  const AOC_message_id = (await channel.send(message)).id;
+  let AOC_message_id =
+    (await channel.messages.fetch({ limit: 1 })).first() ||
+    (await channel.send(message));
+
   setInterval(
     async (AOC_message_id) => {
       const channel = await client.channels.fetch(AOC_leaderboard_channel);
@@ -62,7 +65,9 @@ async function adventOfCode() {
     const scoreString = starsPerDay.join("").padEnd(25);
     return `${((idx + 1).toString() + ")").padStart(3)} ${m.local_score
       .toString()
-      .padStart(3, " ")} ${scoreString} ${m.name}`;
+      .padStart(3, " ")} ${scoreString} ${
+      m.name === null ? "anonymous" : m.name
+    }`;
   });
 
   return `🎄 **Advent of Code Leaderboard 2021**\
