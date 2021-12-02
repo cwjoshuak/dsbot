@@ -23,22 +23,17 @@ client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   const channel = await client.channels.fetch(AOC_leaderboard_channel);
   const message = await adventOfCode();
-  let AOC_message_id =
-    (await channel.messages.fetch({ limit: 1 })).first() ||
-    (await channel.send(message));
-
-  setInterval(
-    async (AOC_message_id) => {
-      const channel = await client.channels.fetch(AOC_leaderboard_channel);
-      const message = await adventOfCode();
-      const msg = await channel.messages.fetch(AOC_message_id);
-      await msg.edit(message);
-    },
-    600000,
-    AOC_message_id
-  );
+  let AOC_message_id = (await channel.messages.fetch({ limit: 1 })).first().id;
+  if (AOC_message_id) AOCLeaderboardEdit(AOC_message_id);
+  else AOC_message_id = await channel.send(message);
+  setInterval(AOCLeaderboardEdit, 600000, AOC_message_id);
 });
-
+async function AOCLeaderboardEdit(AOC_message_id) {
+  const channel = await client.channels.fetch(AOC_leaderboard_channel);
+  const message = await adventOfCode();
+  const msg = await channel.messages.fetch(AOC_message_id);
+  await msg.edit(message);
+}
 /**
  * Utility function to fetch and delete messages
  *
@@ -65,18 +60,21 @@ async function adventOfCode() {
     (m1, m2) => m2.local_score - m1.local_score + m2.stars - m1.stars
   );
   data = data.map((m, idx) => {
+    let numDoubleStars = 0;
     let starsPerDay = Object.values(m.completion_day_level).map((c) => {
       const length = Object.values(c).length;
-      if (length === 2) return "🌟";
-      else if (length === 1) return "⭐";
+      if (length === 2) {
+        numDoubleStars += 1;
+        return "🌟";
+      } else if (length === 1) return "⭐";
       return "";
     });
 
     starsPerDay = starsPerDay
       .concat(Array(daysSinceStart - starsPerDay.length).fill("⚫"))
       .slice(0, daysSinceStart);
-
-    const scoreString = starsPerDay.join("").padEnd(25);
+    starsPerDay;
+    const scoreString = starsPerDay.join("").padEnd(25 + numDoubleStars);
     return `${((idx + 1).toString() + ")").padStart(3)} ${m.local_score
       .toString()
       .padStart(3, " ")} ${scoreString} ${
