@@ -127,7 +127,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
   ) {
     if (
       reaction.emoji.name === "💀" &&
-      message.reactions.cache.get("💀").count >= 7
+      message.reactions.cache.get("💀").count - 1 === 6
     ) {
       const msg = reaction.message;
 
