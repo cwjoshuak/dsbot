@@ -40,6 +40,20 @@ client.on("ready", async () => {
 });
 
 /**
+ * Utility function to fetch and delete messages
+ *
+ * @param {Discord.Client} client - Discord client
+ * @param {string} channelID - Channel ID to delete messages from
+ * @param {number} numOfMessages - number of messages to fetch and delete
+ */
+async function deleteMessages(client, channelID, numOfMessages) {
+  const tempChn = await client.channels.fetch(channelID);
+  (await tempChn.messages.fetch({ limit: numOfMessages })).forEach(
+    async (msg) => await tempChn.messages.delete(msg)
+  );
+}
+
+/**
  * @param {Discord.TextChannel} channel - Advent of Code text channel
  *
  */
