@@ -19,20 +19,32 @@ const client = new Discord.Client({
 });
 const session_id = process.env.AOC_SESSION_ID;
 const AOC_leaderboard_channel = "915535821912813608";
+
 client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
   const channel = await client.channels.fetch(AOC_leaderboard_channel);
   const message = await adventOfCode();
+
   let AOC_message_id = (await channel.messages.fetch({ limit: 1 })).first().id;
   if (AOC_message_id) AOCLeaderboardEdit(AOC_message_id);
-  else AOC_message_id = await channel.send(message);
+  else AOC_message_id = await channel.send("", AOCEmbed(message));
   setInterval(AOCLeaderboardEdit, 600000, AOC_message_id);
 });
+
 async function AOCLeaderboardEdit(AOC_message_id) {
   const channel = await client.channels.fetch(AOC_leaderboard_channel);
-  const message = await adventOfCode();
+  const embedContent = await adventOfCode();
   const msg = await channel.messages.fetch(AOC_message_id);
-  await msg.edit(message);
+  const embed = AOCEmbed(embedContent);
+  await msg.edit("", embed);
+}
+function AOCEmbed(content) {
+  return new Discord.MessageEmbed()
+    .setColor("99e169")
+    .setTitle("🎄 Advent of Code Leaderboard 2021 🎄")
+    .setDescription(content)
+    .setFooter("Last Updated")
+    .setTimestamp();
 }
 /**
  * Utility function to fetch and delete messages
@@ -82,8 +94,7 @@ async function adventOfCode() {
     }`;
   });
 
-  return `🎄 **Advent of Code Leaderboard 2021**\
-    \`\`\`${data.join("\n")}\`\`\``;
+  return `\`\`\`${data.join("\n")}\`\`\``;
 }
 async function getAOCLeaderboard() {
   const response = await fetch(
