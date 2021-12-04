@@ -5,6 +5,8 @@
   "repository": "https://github.com/cwjoshuak/dsbot",
   "main": "bot.js",
   "dependencies": {
+    "date-fns": "^2.27.0",
+    "date-fns-tz": "^1.1.6",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "moment": "^2.29.1",

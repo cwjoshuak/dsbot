@@ -5,6 +5,8 @@ const Discord = require("discord.js");
 require("dotenv").config();
 const fetch = require("node-fetch");
 const MongoClient = require("mongodb").MongoClient;
+const { utcToZonedTime, format } = require("date-fns-tz");
+
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PW}@database.mc895.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
 
 const db = new MongoClient(uri, {
@@ -65,7 +67,8 @@ async function deleteMessages(client, channelID, numOfMessages) {
  *
  */
 async function adventOfCode() {
-  const daysSinceStart = new Date().getDate();
+  const timeZone = "America/New_York";
+  const daysSinceStart = utcToZonedTime(new Date(), timeZone).getDate();
 
   let data = await getAOCLeaderboard();
   data = Object.values(data.members).sort(
@@ -81,7 +84,6 @@ async function adventOfCode() {
       } else if (length === 1) return "⭐";
       return "";
     });
-
     starsPerDay = starsPerDay
       .concat(Array(daysSinceStart - starsPerDay.length).fill("⚫"))
       .slice(0, daysSinceStart);
