@@ -3,7 +3,9 @@
 const Discord = require("discord.js");
 
 require("dotenv").config();
+
 const fetch = require("node-fetch");
+const Cron = require("croner");
 const MongoClient = require("mongodb").MongoClient;
 const { utcToZonedTime, format } = require("date-fns-tz");
 
@@ -13,12 +15,15 @@ const db = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
 db.connect((err) => {
   if (err) return;
 });
+
 const client = new Discord.Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
+
 const session_id = process.env.AOC_SESSION_ID;
 const AOC_leaderboard_channel = "915535821912813608";
 
@@ -31,6 +36,15 @@ client.on("ready", async () => {
   if (AOC_message_id) AOCLeaderboardEdit(AOC_message_id);
   else AOC_message_id = await channel.send("", AOCEmbed(message));
   setInterval(AOCLeaderboardEdit, 600000, AOC_message_id);
+
+  const job = Cron("0 45 20 1-25 DEC *", (self) => {
+    client.channels
+      .fetch("857795047663206420")
+      .then((chn) =>
+        chn.send("<@&915489441282416660> Time for Advent of Code, nerds.")
+      )
+      .catch(console.err);
+  });
 });
 
 async function AOCLeaderboardEdit(AOC_message_id) {
@@ -98,6 +112,7 @@ async function adventOfCode() {
 
   return `\`\`\`${data.join("\n")}\`\`\``;
 }
+
 async function getAOCLeaderboard() {
   const response = await fetch(
     "https://adventofcode.com/2021/leaderboard/private/view/1519450.json",
