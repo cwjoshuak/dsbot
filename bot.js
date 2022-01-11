@@ -29,22 +29,22 @@ const AOC_leaderboard_channel = "915535821912813608";
 
 client.on("ready", async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  const channel = await client.channels.fetch(AOC_leaderboard_channel);
-  const message = await adventOfCode();
+  // const channel = await client.channels.fetch(AOC_leaderboard_channel);
+  // const message = await adventOfCode();
 
-  let AOC_message_id = (await channel.messages.fetch({ limit: 1 })).first().id;
-  if (AOC_message_id) AOCLeaderboardEdit(AOC_message_id);
-  else AOC_message_id = await channel.send("", AOCEmbed(message));
-  setInterval(AOCLeaderboardEdit, 600000, AOC_message_id);
+  // let AOC_message_id = (await channel.messages.fetch({ limit: 1 })).first().id;
+  // if (AOC_message_id) AOCLeaderboardEdit(AOC_message_id);
+  // else AOC_message_id = await channel.send("", AOCEmbed(message));
+  // setInterval(AOCLeaderboardEdit, 600000, AOC_message_id);
 
-  const job = Cron("0 45 20 1-25 DEC *", (self) => {
-    client.channels
-      .fetch("857795047663206420")
-      .then((chn) =>
-        chn.send("<@&915489441282416660> Time for Advent of Code, nerds.")
-      )
-      .catch(console.err);
-  });
+  // const job = Cron("0 45 20 1-25 DEC *", (self) => {
+  //   client.channels
+  //     .fetch("857795047663206420")
+  //     .then((chn) =>
+  //       chn.send("<@&915489441282416660> Time for Advent of Code, nerds.")
+  //     )
+  //     .catch(console.err);
+  // });
 });
 
 async function AOCLeaderboardEdit(AOC_message_id) {
